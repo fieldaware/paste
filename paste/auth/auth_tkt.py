@@ -168,19 +168,20 @@ def parse_ticket(secret, ticket, ip, digest_algo=DEFAULT_DIGEST):
         # correct specification of digest from hashlib or fail
         digest_algo = getattr(hashlib, digest_algo)
     digest_hexa_size = digest_algo().digest_size * 2
-    ticket = ticket.strip(b'"')
+    ticket = ticket.strip('"')
     digest = ticket[:digest_hexa_size]
     try:
         timestamp = int(ticket[digest_hexa_size:digest_hexa_size + 8], 16)
     except ValueError as e:
         raise BadTicket('Timestamp is not a hex integer: %s' % e)
     try:
-        userid, data = ticket[digest_hexa_size + 8:].split(b'!', 1)
+        userid, data = ticket[digest_hexa_size + 8:].split('!', 1)
     except ValueError:
         raise BadTicket('userid is not followed by !')
-    userid = url_unquote(userid.decode())
-    if b'!' in data:
-        tokens, user_data = data.split(b'!', 1)
+    print('Userid: {userid}')
+    userid = url_unquote(userid)
+    if '!' in data:
+        tokens, user_data = data.split('!', 1)
     else:
         # @@: Is this the right order?
         tokens = b''
@@ -194,7 +195,7 @@ def parse_ticket(secret, ticket, ip, digest_algo=DEFAULT_DIGEST):
         raise BadTicket('Digest signature is not correct',
                         expected=(expected, digest))
 
-    tokens = tokens.split(b',')
+    tokens = tokens.split(',')
 
     return (timestamp, userid, tokens, user_data)
 
